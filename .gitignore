@@ -1,0 +1,137 @@
+# iExporter3 - Git Ignore File
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+env/
+ENV/
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Node.js / Electron
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+
+# Electron build outputs
+frontend/desktop/dist/
+frontend/desktop/build/
+frontend/desktop/out/
+
+# Operating System
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Data Files (CRITICAL: Never commit evidence or case data)
+data/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Exports (CRITICAL: Never commit exports containing evidence)
+exports/
+*.html
+*.json
+*.hash.json
+*_annotations.json
+*_attachments.json
+
+# Attachments (CRITICAL: Never commit extracted attachments)
+attachments/
+original/
+thumbs/
+
+# Reports
+reports/
+*.pdf
+
+# Logs
+logs/
+*.log
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+
+# Test Data (Keep test fixtures, ignore generated test output)
+tests/output/
+tests/temp/
+
+# macOS Specific
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Security (CRITICAL: Never commit sensitive data)
+*.pem
+*.key
+*.cert
+*.p12
+credentials.json
+secrets.json
+.env
+.env.local
+
+# Documentation Build Artifacts
+docs/_build/
+docs/.doctrees/
+
+# Backup Files
+*.bak
+*.backup
+*~
+
+# IDE-specific
+*.iml
+.project
+.classpath
+.c9/
+.settings/
+.loadpath
+
+# End of .gitignore

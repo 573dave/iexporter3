@@ -1,0 +1,54 @@
+# iExporter3 - Python Dependencies
+# Forensic-grade iMessage extraction and annotation system
+
+# Core Framework
+sqlalchemy>=2.0.23              # ORM for SQLite database management
+alembic>=1.13.0                 # Database migrations
+
+# Data Processing
+python-dateutil>=2.8.2          # Timezone handling and date parsing
+pytz>=2024.1                    # Timezone support
+
+# Hashing and Security
+hashlib                          # Built-in SHA-256 hashing (no install needed)
+cryptography>=41.0.7            # Additional crypto utilities
+
+# HTML/PDF Export
+jinja2>=3.1.2                   # HTML template engine
+weasyprint>=60.1                # HTML to PDF conversion
+markdown>=3.5.1                 # Markdown support in reports
+pillow>=10.1.0                  # Image processing (thumbnails)
+
+# File Handling
+pathlib                          # Built-in path handling (no install needed)
+shutil                           # Built-in file operations (no install needed)
+
+# Testing
+pytest>=7.4.3                   # Unit testing framework
+pytest-cov>=4.1.0               # Code coverage
+pytest-mock>=3.12.0             # Mocking support
+
+# Development Tools
+black>=23.12.0                  # Code formatting
+pylint>=3.0.3                   # Linting
+mypy>=1.7.1                     # Type checking
+
+# macOS iMessage Database Access
+# Note: iMessage database is located at:
+# ~/Library/Messages/chat.db (requires Full Disk Access permission)
+
+# Logging and Debugging
+colorlog>=6.8.0                 # Colored logging output
+
+# JSON Schema Validation
+jsonschema>=4.20.0              # Validate JSON structures
+
+# Command Line Interface
+click>=8.1.7                    # CLI framework
+rich>=13.7.0                    # Rich terminal output
+
+# Performance
+tqdm>=4.66.1                    # Progress bars
+
+# File Type Detection
+python-magic>=0.4.27            # MIME type detection
