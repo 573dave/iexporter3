@@ -73,11 +73,13 @@ data/
 
 # Exports (CRITICAL: Never commit exports containing evidence)
 exports/
-*.html
-*.json
+# Block generated export files, but allow templates and config
+**/conversation_*.html
+!frontend/templates/*.html
 *.hash.json
 *_annotations.json
 *_attachments.json
+data/**/*.json
 
 # Attachments (CRITICAL: Never commit extracted attachments)
 attachments/

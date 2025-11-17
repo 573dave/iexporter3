@@ -1,0 +1,436 @@
+/**
+ * iExporter3 Conversation Viewer - Main Styles
+ * 3-Column Layout: Navigation | iMessage View | Annotations
+ */
+
+/* ========================================
+   CSS Variables (Design System)
+   ======================================== */
+:root {
+    /* Colors */
+    --color-primary: #007AFF;
+    --color-primary-dark: #0051D5;
+    --color-secondary: #5856D6;
+    --color-success: #34C759;
+    --color-warning: #FF9500;
+    --color-danger: #FF3B30;
+
+    --color-bg-primary: #FFFFFF;
+    --color-bg-secondary: #F2F2F7;
+    --color-bg-tertiary: #E5E5EA;
+
+    --color-text-primary: #000000;
+    --color-text-secondary: #3C3C43;
+    --color-text-tertiary: #8E8E93;
+
+    --color-border: #C6C6C8;
+    --color-divider: #E5E5EA;
+
+    /* iMessage Colors */
+    --color-imessage-blue: #007AFF;
+    --color-imessage-gray: #E5E5EA;
+    --color-imessage-text-light: #FFFFFF;
+    --color-imessage-text-dark: #000000;
+
+    /* Tag Colors */
+    --color-tag-key: #FF3B30;
+    --color-tag-timeline: #5856D6;
+    --color-tag-privileged: #FF9500;
+    --color-tag-workproduct: #34C759;
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+
+    /* Typography */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    --font-size-xs: 11px;
+    --font-size-sm: 13px;
+    --font-size-base: 15px;
+    --font-size-md: 17px;
+    --font-size-lg: 20px;
+    --font-size-xl: 24px;
+
+    /* Layout */
+    --sidebar-width: 280px;
+    --header-height: 60px;
+    --border-radius: 8px;
+    --border-radius-sm: 4px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+
+    /* Z-index layers */
+    --z-header: 100;
+    --z-sidebar: 50;
+    --z-modal: 1000;
+    --z-lightbox: 2000;
+}
+
+/* Dark mode support (future enhancement) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-bg-primary: #000000;
+        --color-bg-secondary: #1C1C1E;
+        --color-bg-tertiary: #2C2C2E;
+
+        --color-text-primary: #FFFFFF;
+        --color-text-secondary: #EBEBF5;
+        --color-text-tertiary: #8E8E93;
+
+        --color-border: #38383A;
+        --color-divider: #2C2C2E;
+
+        --color-imessage-gray: #2C2C2E;
+    }
+}
+
+/* ========================================
+   Reset & Base Styles
+   ======================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-secondary);
+    overflow: hidden;
+}
+
+/* ========================================
+   Header
+   ======================================== */
+.main-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    background-color: var(--color-bg-primary);
+    border-bottom: 1px solid var(--color-divider);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--spacing-lg);
+    z-index: var(--z-header);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.header-left h1 {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.case-badge {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background-color: var(--color-bg-tertiary);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+}
+
+.header-center {
+    flex: 1;
+    text-align: center;
+}
+
+.part-indicator {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.work-product-badge {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-warning);
+    background-color: rgba(255, 149, 0, 0.1);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-warning);
+}
+
+/* ========================================
+   Main Layout (3 Columns)
+   ======================================== */
+.viewer-container {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr var(--sidebar-width);
+    gap: 0;
+    overflow: hidden;
+}
+
+/* Left Sidebar */
+.left-sidebar {
+    background-color: var(--color-bg-primary);
+    border-right: 1px solid var(--color-divider);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--spacing-lg);
+}
+
+/* Middle Column (Conversation) */
+.conversation-view {
+    background-color: var(--color-bg-secondary);
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Right Sidebar */
+.right-sidebar {
+    background-color: var(--color-bg-primary);
+    border-left: 1px solid var(--color-divider);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--spacing-lg);
+}
+
+/* ========================================
+   Scrollbar Styling
+   ======================================== */
+.left-sidebar::-webkit-scrollbar,
+.conversation-view::-webkit-scrollbar,
+.right-sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.left-sidebar::-webkit-scrollbar-track,
+.conversation-view::-webkit-scrollbar-track,
+.right-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.left-sidebar::-webkit-scrollbar-thumb,
+.conversation-view::-webkit-scrollbar-thumb,
+.right-sidebar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.left-sidebar::-webkit-scrollbar-thumb:hover,
+.conversation-view::-webkit-scrollbar-thumb:hover,
+.right-sidebar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================
+   Buttons
+   ======================================== */
+button {
+    font-family: var(--font-family);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.btn-secondary {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-border);
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+}
+
+.btn-danger:hover {
+    background-color: #D70015;
+}
+
+.btn-text {
+    background-color: transparent;
+    color: var(--color-primary);
+    padding: var(--spacing-sm);
+}
+
+.btn-text:hover {
+    color: var(--color-primary-dark);
+}
+
+.btn-sm {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
+}
+
+/* ========================================
+   Forms
+   ======================================== */
+input[type="text"],
+input[type="search"],
+input[type="date"],
+select,
+textarea {
+    font-family: var(--font-family);
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    width: 100%;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ========================================
+   Utilities
+   ======================================== */
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: var(--color-text-tertiary);
+}
+
+.mt-sm {
+    margin-top: var(--spacing-sm);
+}
+
+.mt-md {
+    margin-top: var(--spacing-md);
+}
+
+.mb-sm {
+    margin-bottom: var(--spacing-sm);
+}
+
+.mb-md {
+    margin-bottom: var(--spacing-md);
+}
+
+/* ========================================
+   Loading States
+   ======================================== */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--color-bg-tertiary);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========================================
+   Responsive (Collapse sidebars on small screens)
+   ======================================== */
+@media (max-width: 1200px) {
+    .viewer-container {
+        grid-template-columns: 240px 1fr 240px;
+    }
+
+    :root {
+        --sidebar-width: 240px;
+    }
+}
+
+@media (max-width: 992px) {
+    .viewer-container {
+        grid-template-columns: 1fr;
+    }
+
+    .left-sidebar,
+    .right-sidebar {
+        display: none;
+    }
+}
+
+/* ========================================
+   Print Styles
+   ======================================== */
+@media print {
+    .main-header,
+    .left-sidebar,
+    .right-sidebar,
+    .annotate-btn {
+        display: none !important;
+    }
+
+    .viewer-container {
+        grid-template-columns: 1fr;
+    }
+
+    .conversation-view {
+        overflow: visible;
+    }
+}

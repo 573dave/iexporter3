@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ case_id }} - Conversation Viewer - iExporter3</title>
+
+    <!-- Forensic Metadata -->
+    <meta name="case-id" content="{{ case_id }}">
+    <meta name="conversation-id" content="{{ conversation_id }}">
+    <meta name="part-number" content="{{ part_number }}">
+    <meta name="total-parts" content="{{ total_parts }}">
+    <meta name="export-timestamp" content="{{ export_timestamp }}">
+    <meta name="export-hash" content="{{ export_hash }}">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="./static/css/viewer.css">
+    <link rel="stylesheet" href="./static/css/imessage.css">
+    <link rel="stylesheet" href="./static/css/sidebar.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="{% if mode == 'annotated' %}annotated-mode{% else %}clean-mode{% endif %}">
+
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-left">
+            <h1>iExporter3</h1>
+            <span class="case-badge">Case: {{ case_id }}</span>
+        </div>
+        <div class="header-center">
+            <span class="part-indicator">Part {{ part_number }} of {{ total_parts }}</span>
+        </div>
+        <div class="header-right">
+            {% if mode == 'annotated' %}
+            <span class="work-product-badge">⚠️ INTERNAL WORK PRODUCT ONLY</span>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Main Container (3 columns) -->
+    <div class="viewer-container">
+
+        <!-- LEFT SIDEBAR: Navigation & Details -->
+        <aside class="left-sidebar">
+
+            <!-- Hash Verification Status -->
+            <section class="hash-verification">
+                <h3>Evidence Integrity</h3>
+                <div id="hash-status" class="hash-status loading">
+                    <div class="spinner"></div>
+                    <span>Verifying...</span>
+                </div>
+                <button id="verify-hash-btn" class="btn-secondary">Re-verify</button>
+            </section>
+
+            <!-- Case Metadata -->
+            <section class="case-metadata">
+                <h3>Case Information</h3>
+                <dl>
+                    <dt>Case ID:</dt>
+                    <dd>{{ case_id }}</dd>
+
+                    <dt>Extracted:</dt>
+                    <dd>{{ extraction_timestamp | format_datetime }}</dd>
+
+                    <dt>Extractor:</dt>
+                    <dd>{{ extractor_name }}</dd>
+
+                    <dt>Messages:</dt>
+                    <dd>{{ message_count | number_format }}</dd>
+
+                    <dt>Attachments:</dt>
+                    <dd>{{ attachment_count | number_format }}</dd>
+                </dl>
+            </section>
+
+            <!-- Navigation -->
+            <section class="navigation">
+                <h3>Navigation</h3>
+
+                {% if total_parts > 1 %}
+                <div class="part-selector">
+                    <label for="part-select">Conversation Part:</label>
+                    <select id="part-select">
+                        {% for i in range(1, total_parts + 1) %}
+                        <option value="{{ i }}" {% if i == part_number %}selected{% endif %}>
+                            Part {{ i }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <div class="jump-to-message">
+                    <label for="message-id-input">Jump to Message:</label>
+                    <input type="text" id="message-id-input" placeholder="MSG_...">
+                    <button id="jump-btn" class="btn-primary">Go</button>
+                </div>
+            </section>
+
+            <!-- Search -->
+            <section class="search">
+                <h3>Search</h3>
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Search messages...">
+                    <button id="search-btn" class="btn-primary">Search</button>
+                </div>
+                <div id="search-results" class="search-results hidden">
+                    <p class="results-count">0 results</p>
+                    <ul id="search-results-list"></ul>
+                </div>
+            </section>
+
+            <!-- Date Filter -->
+            <section class="date-filter">
+                <h3>Date Range</h3>
+                <div class="date-inputs">
+                    <input type="date" id="date-from">
+                    <span>to</span>
+                    <input type="date" id="date-to">
+                </div>
+                <button id="filter-date-btn" class="btn-secondary">Filter</button>
+                <button id="clear-filter-btn" class="btn-text">Clear</button>
+            </section>
+
+        </aside>
+
+        <!-- MIDDLE COLUMN: iMessage-style Conversation -->
+        <main class="conversation-view">
+            <div class="conversation-header">
+                <h2>{{ conversation_name | default('Conversation') }}</h2>
+                <p class="message-count">{{ message_count | number_format }} messages</p>
+            </div>
+
+            <div id="messages-container" class="messages-container">
+                {% for message in messages %}
+                <div
+                    id="{{ message.message_id }}"
+                    class="message-wrapper {% if message.is_from_me %}from-me{% else %}from-them{% endif %}"
+                    data-timestamp="{{ message.timestamp }}"
+                    data-sender="{{ message.sender_id }}"
+                >
+                    <!-- Sender name (for group chats or "from-them" messages) -->
+                    {% if not message.is_from_me %}
+                    <div class="sender-name">{{ message.sender_name }}</div>
+                    {% endif %}
+
+                    <!-- Message bubble -->
+                    <div class="message-bubble">
+                        <!-- Text content -->
+                        {% if message.message_text %}
+                        <div class="message-text">{{ message.message_text | safe }}</div>
+                        {% endif %}
+
+                        <!-- Attachments -->
+                        {% if message.has_attachment and message.attachments %}
+                        <div class="message-attachments">
+                            {% for attachment in message.attachments %}
+                                {% if attachment.is_image %}
+                                <!-- Image attachment with thumbnail -->
+                                <div class="attachment-image">
+                                    <img
+                                        src="{{ attachment.thumbnail_path }}"
+                                        alt="{{ attachment.original_filename }}"
+                                        data-original="{{ attachment.original_path }}"
+                                        class="attachment-thumbnail"
+                                        loading="lazy"
+                                    >
+                                </div>
+                                {% else %}
+                                <!-- File attachment -->
+                                <div class="attachment-file">
+                                    <span class="file-icon">📄</span>
+                                    <div class="file-info">
+                                        <div class="file-name">{{ attachment.original_filename }}</div>
+                                        <div class="file-size">{{ attachment.file_size | format_file_size }}</div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Timestamp -->
+                        <div class="message-timestamp">
+                            {{ message.timestamp | format_time }}
+                        </div>
+                    </div>
+
+                    <!-- Annotate button (desktop mode only) -->
+                    {% if mode == 'desktop' %}
+                    <button
+                        class="annotate-btn"
+                        data-message-id="{{ message.message_id }}"
+                        title="Add annotation"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M2 10L6 14L14 2" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                    {% endif %}
+
+                    <!-- Annotation indicator (if annotation exists) -->
+                    {% if message.annotation %}
+                    <div class="annotation-indicator" title="This message has annotations">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <circle cx="8" cy="8" r="8"/>
+                        </svg>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Load more -->
+            <div class="load-more-container">
+                <button id="load-more-btn" class="btn-secondary" style="display: none;">
+                    Load More Messages
+                </button>
+            </div>
+        </main>
+
+        <!-- RIGHT SIDEBAR: Annotations -->
+        <aside class="right-sidebar">
+            {% if mode in ['annotated', 'desktop'] %}
+
+            <!-- Annotation Header -->
+            <div class="annotation-header">
+                <h3>Annotations</h3>
+                {% if mode == 'desktop' %}
+                <button id="new-annotation-btn" class="btn-primary btn-sm">
+                    + Annotate
+                </button>
+                {% endif %}
+            </div>
+
+            <!-- Tag Filter -->
+            <div class="tag-filter">
+                <label>Filter by Tag:</label>
+                <div class="tag-checkboxes">
+                    <label>
+                        <input type="checkbox" value="Key" checked>
+                        <span class="tag-badge tag-key">Key</span>
+                        <span class="tag-count" id="count-key">(0)</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" value="Timeline" checked>
+                        <span class="tag-badge tag-timeline">Timeline</span>
+                        <span class="tag-count" id="count-timeline">(0)</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" value="Privileged" checked>
+                        <span class="tag-badge tag-privileged">Privileged</span>
+                        <span class="tag-count" id="count-privileged">(0)</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" value="WorkProduct" checked>
+                        <span class="tag-badge tag-workproduct">Work Product</span>
+                        <span class="tag-count" id="count-workproduct">(0)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Annotations List -->
+            <div id="annotations-list" class="annotations-list">
+                <!-- Populated by JavaScript from annotations.json -->
+                <div class="empty-state">
+                    <p>No annotations yet.</p>
+                    {% if mode == 'desktop' %}
+                    <p class="hint">Click the <svg width="12" height="12" viewBox="0 0 16 16"><path d="M2 10L6 14L14 2" stroke="currentColor" stroke-width="2"/></svg> icon on any message to add an annotation.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% else %}
+            <!-- Clean mode: No annotations -->
+            <div class="clean-mode-message">
+                <p>This is a clean export with no annotations.</p>
+                <p>Evidence only.</p>
+            </div>
+            {% endif %}
+        </aside>
+
+    </div>
+
+    <!-- Annotation Modal (Desktop mode only) -->
+    {% if mode == 'desktop' %}
+    <div id="annotation-modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Annotate Message</h3>
+                <button class="modal-close" id="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Message preview -->
+                <div class="message-preview">
+                    <div class="preview-label">Message:</div>
+                    <div id="preview-text" class="preview-text"></div>
+                    <div id="preview-attachment" class="preview-attachment"></div>
+                    <div class="preview-meta">
+                        <span id="preview-sender"></span> •
+                        <span id="preview-timestamp"></span>
+                    </div>
+                </div>
+
+                <!-- Tag selector -->
+                <div class="form-group">
+                    <label>Tags:</label>
+                    <div class="tag-selector">
+                        <label><input type="checkbox" name="tags" value="Key"> Key</label>
+                        <label><input type="checkbox" name="tags" value="Timeline"> Timeline</label>
+                        <label><input type="checkbox" name="tags" value="Privileged"> Privileged</label>
+                        <label><input type="checkbox" name="tags" value="WorkProduct"> Work Product</label>
+                    </div>
+                </div>
+
+                <!-- Note editor -->
+                <div class="form-group">
+                    <label for="annotation-note">Note:</label>
+                    <textarea
+                        id="annotation-note"
+                        rows="6"
+                        maxlength="10000"
+                        placeholder="Add your notes here..."
+                    ></textarea>
+                    <div class="character-count">
+                        <span id="char-count">0</span> / 10,000
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="delete-annotation-btn" class="btn-danger" style="display: none;">
+                    Delete
+                </button>
+                <div class="modal-actions">
+                    <button id="cancel-annotation-btn" class="btn-secondary">
+                        Cancel
+                    </button>
+                    <button id="save-annotation-btn" class="btn-primary">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Image Lightbox -->
+    <div id="image-lightbox" class="lightbox hidden">
+        <div class="lightbox-overlay"></div>
+        <div class="lightbox-content">
+            <button class="lightbox-close">&times;</button>
+            <img id="lightbox-image" src="" alt="">
+            <div class="lightbox-info">
+                <span id="lightbox-filename"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./static/js/hash-verification.js"></script>
+    <script src="./static/js/navigation.js"></script>
+    <script src="./static/js/search.js"></script>
+    <script src="./static/js/annotations.js"></script>
+    <script src="./static/js/viewer.js"></script>
+
+    <!-- Load annotations data (if in annotated mode) -->
+    {% if mode in ['annotated', 'desktop'] %}
+    <script>
+        // Load annotations from JSON file
+        fetch('./conversation_{{ part_number | string | zfill(3) }}_annotations.json')
+            .then(response => response.json())
+            .then(data => {
+                window.annotationsData = data;
+                window.annotations = new AnnotationsManager(data);
+            })
+            .catch(error => {
+                console.warn('No annotations file found:', error);
+                window.annotationsData = { annotations: [] };
+                window.annotations = new AnnotationsManager({ annotations: [] });
+            });
+    </script>
+    {% endif %}
+
+</body>
+</html>
