@@ -18,6 +18,9 @@ jinja2>=3.1.2                   # HTML template engine
 weasyprint>=60.1                # HTML to PDF conversion
 markdown>=3.5.1                 # Markdown support in reports
 pillow>=10.1.0                  # Image processing (thumbnails)
+pdf2image>=1.16.3               # PDF to image conversion (requires poppler)
+# Note: pdf2image requires poppler-utils (install via: brew install poppler / apt-get install poppler-utils)
+# Note: Video thumbnails require ffmpeg (install via: brew install ffmpeg / apt-get install ffmpeg)
 
 # File Handling
 pathlib                          # Built-in path handling (no install needed)
